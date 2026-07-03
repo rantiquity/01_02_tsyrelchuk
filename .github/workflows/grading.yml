@@ -5,32 +5,55 @@ on: [push]
 jobs:
   grade:
     runs-on: ubuntu-latest
+    env:
+      # Использование бинарного репозитория Posit (RStudio) для моментальной установки на Ubuntu
+      R_REPOS: "https://posit.co"
+
     steps:
-      # 1. Скачиваем код, который отправил студент
+      # 1. Скачиваем код студента
       - name: Checkout student code
         uses: actions/checkout@v5
 
-      # 2. Скачиваем скрытые тесты из вашего приватного репозитория hw1-tests
+      # 2. Скачиваем скрытые тесты
       - name: Fetch hidden tests
         uses: actions/checkout@v5
         with:
           repository: 'rantiquity/01_02_Tabular_Test'
           token: ${{ secrets.TESTS_DOWNLOAD_TOKEN }}
+          path: 'hidden_tests_dir' 
 
       # 3. Разворачиваем среду R
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: 'release'
+          use-public-rspm: true # Использовать быстрый менеджер пакетов
 
-      # 4. Устанавливаем пакет testthat для проверки
+      # 3.5 Включаем умное кэширование библиотек R
+      - name: Cache R packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-r-${{ hashFiles('hidden_tests_dir/DESCRIPTION') }}
+          restore-keys: ${{ runner.os }}-r-
+
+      # 4. Устанавливаем пакеты (теперь они подтянутся из кэша или поставятся мгновенно)
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          packages: |
+          working-directory: 'hidden_tests_dir'
+          extra-packages: |
             any::testthat
+            any::tidyverse
+            any::gutenbergr
 
-      # 5. Запускаем скрытые тесты. Файл студента будет виден скрипту.
+      # 5. Запускаем скрытые тесты
       - name: Run hidden tests
         run: |
-          Rscript -e 'testthat::test_file("test_hidden.R")'
+          Rscript -e '
+            results <- testthat::test_file("hidden_tests_dir/test_hidden.R")
+            df <- as.data.frame(results)
+            if (sum(df$failed) > 0 || sum(df$error) > 0) {
+              stop("Тесты не пройдены!")
+            }
+          '
