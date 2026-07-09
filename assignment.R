@@ -17,8 +17,8 @@ my_data <- works |>
 # столбец с именем и фамилией на два новых: author, name. 
 # Удалите столбец name
 my_data2 <- my_data |>
-  separate_wider_delim(author, delim = " ", names = c("author", "name"), too_few = "align_start") |> 
-  select(-name)
+   separate_wider_delim(author, delim = " ", names = c("author", "name"), too_few = "align_start") |>   
+   select(-name)
 
 
 # (3) Используйте group_by() и summarise(), чтобы узнать,
