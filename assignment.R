@@ -25,6 +25,5 @@ my_data2 <- my_data |>
 # сколько произведений Шекспира и Марлоу хранится в библиотеке Gutenberg
 # новый столбец должен называться n, не делайте сортировку 
 my_data3 <- my_data2 |>
-   filter(gutenberg_author_id == 65 | gutenberg_author_id == 410) |> 
-  group_by(gutenberg_author_id, author) |> 
+  group_by(author) |> 
   summarise(n = n())
