@@ -17,7 +17,7 @@ my_data <- works |>
 # столбец с именем и фамилией на два новых: author, name. 
 # Удалите столбец name
 my_data2 <- my_data |>
-  separate(author, into = c("author", "name"), sep = " ", extra = "merge", fill = "right") |>  
+  separate_wider_delim(author, delim = " ", names = c("author", "name"), too_few = "align_start") |> 
   select(-name)
 
 
