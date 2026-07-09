@@ -10,15 +10,21 @@ works <- gutenberg_works()
 # после этого выберите два столбца: author, title
 my_data <- works |> 
   # ваш код здесь
+ works|> 
+  filter (gutenberg_author_id == 65 | gutenberg_author_id == 410) |> 
+   select (author, title)
 
 # (2) Используйте функцию separate(), чтобы разделить 
 # столбец с именем и фамилией на два новых: author, name. 
 # Удалите столбец name
 my_data2 <- my_data |>
-  # ваш код здесь
+  separate(author,into = c("author", "name"),sep = "") |> 
+   select (-name)
+
 
 # (3) Используйте group_by() и summarise(), чтобы узнать,
 # сколько произведений Шекспира и Марлоу хранится в библиотеке Gutenberg
 # новый столбец должен называться n, не делайте сортировку 
 my_data3 <- my_data2 |>
-  # ваш код здесь 
+   group_by(gutenberg_author_id, author) |> 
+   summarise(n = n())
